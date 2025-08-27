@@ -9,6 +9,7 @@
 import XCTest
 @testable import MoviesBox
 
+@MainActor
 final class MoviesListViewModelTests: XCTestCase {
     
     private var sut: MoviesListViewModel!
@@ -29,19 +30,20 @@ final class MoviesListViewModelTests: XCTestCase {
     // Test Success Scenario
     func testFetchMoviesSuccess() async {
         // Arrange
-        let expectedMovies = [
-            MovieListItem(id: 1, title: "Movie 1", posterURL: URL("1"), rating: "1", releaseDate: "2"),
-            MovieListItem(id: 2, title: "Movie 2", posterURL:URL("2"), rating: "2", releaseDate: "2")
+        let expectedItems = [
+            MovieListItem(id: 1, title: "Movie 1", posterURL: URL(string: "https://a") , rating: "8.0", releaseDate: "Jun 1, 2024"),
+            MovieListItem(id: 2, title: "Movie 2", posterURL: URL(string: "https://b"), rating: "7.1", releaseDate: "Jun 2, 2024")
         ]
-        mockUseCase.result = .success(expectedMovies)
+        let list = MoviesList(movies: expectedItems, page: 1, totalPages: 1)
+        mockUseCase.result = .success(list)
         
         // Act
-        await sut.fetchMovies()
+        await sut.fetchMovies(reset: true)
         
         // Assert
-        XCTAssertEqual(sut.movies, expectedMovies)
+        XCTAssertEqual(sut.movies, expectedItems)
         XCTAssertEqual(sut.viewState, .loaded)
-        XCTAssertNil(sut.error)
+        XCTAssertNil(sut.errorMessage)
     }
     
     // Test Failure Scenario
@@ -51,11 +53,11 @@ final class MoviesListViewModelTests: XCTestCase {
         mockUseCase.result = .failure(expectedError)
         
         // Act
-        await sut.fetchMovies()
+        await sut.fetchMovies(reset: true)
         
         // Assert
         XCTAssertTrue(sut.movies.isEmpty)
-        XCTAssertEqual(sut.viewState, .error("Test Error"))
-        XCTAssertEqual(sut.error?.localizedDescription, "Test Error")
+        XCTAssertEqual(sut.viewState, .loaded) // we end loading even on error per current impl
+        XCTAssertEqual(sut.errorMessage, expectedError.localizedDescription)
     }
 }

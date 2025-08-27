@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 import Combine
 
 struct MovieCardView: View {
@@ -104,6 +105,8 @@ struct MovieCardView: View {
             favoriteObject = nil
             isFavorite = false
             NotificationCenter.default.post(name: .favoriteChanged, object: nil, userInfo: ["id": movie.id, "isFavorite": false])
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.warning)
         } else {
             let favorite = FavoriteMovie.from(movie)
             modelContext.insert(favorite)
@@ -111,6 +114,8 @@ struct MovieCardView: View {
             favoriteObject = favorite
             isFavorite = true
             NotificationCenter.default.post(name: .favoriteChanged, object: nil, userInfo: ["id": movie.id, "isFavorite": true])
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
         }
     }
 }

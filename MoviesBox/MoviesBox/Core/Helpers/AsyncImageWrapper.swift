@@ -6,38 +6,77 @@
 //
 
 import SwiftUI
+import UIKit
+import ImageIO
+import UniformTypeIdentifiers
 
 struct AsyncImageWrapper: View {
     let url: String
+    let maxDimension: CGFloat
+
+    @State private var uiImage: UIImage?
+
+    init(url: String, maxDimension: CGFloat = 320) {
+        self.url = url
+        self.maxDimension = maxDimension
+    }
 
     var body: some View {
-        if let cachedImage = AsyncImageWrapper.cache[url] {
-            cachedImage
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-        } else {
-            AsyncImage(url: URL(string: url)) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView()
-                case .success(let downloadedImage):
-                    downloadedImage
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .onAppear { cache(downloadedImage) }
-                case .failure(let error):
-                    EmptyView()
-                @unknown default:
-                    EmptyView()
-                }
+        Group {
+            if let uiImage {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .interpolation(.medium)
+                    .antialiased(true)
+                    .transition(.opacity)
+            } else {
+                ProgressView()
             }
+        }
+        .task(id: url) {
+            await load()
         }
     }
 
-    private func cache(_ image: Image) {
-        AsyncImageWrapper.cache[url] = image
+    @MainActor
+    private func setImage(_ image: UIImage?) {
+        self.uiImage = image
     }
 
-    // Memory Cache
-    static var cache: [String: Image] = [:]
+    private func load() async {
+        guard uiImage == nil, let imageURL = URL(string: url), !url.isEmpty else { return }
+        if let cached = AsyncImageWrapper.cache.object(forKey: url as NSString) {
+             setImage(cached)
+            return
+        }
+        do {
+            let request = URLRequest(url: imageURL, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 30)
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let downsampled = downsample(data: data, maxDimension: Int(maxDimension * UIScreen.main.scale))
+            if let downsampled { AsyncImageWrapper.cache.setObject(downsampled, forKey: url as NSString) }
+             setImage(downsampled)
+        } catch {
+             setImage(nil)
+        }
+    }
+
+    private func downsample(data: Data, maxDimension: Int) -> UIImage? {
+        let options: [NSString: Any] = [
+            kCGImageSourceShouldCache: false,
+            kCGImageSourceTypeIdentifierHint: UTType.jpeg.identifier as NSString
+        ]
+        guard let source = CGImageSourceCreateWithData(data as CFData, options as CFDictionary) else { return UIImage(data: data) }
+        let downsampleOptions: [NSString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxDimension,
+            kCGImageSourceCreateThumbnailWithTransform: true
+        ]
+        guard let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampleOptions as CFDictionary) else {
+            return UIImage(data: data)
+        }
+        return UIImage(cgImage: cgImage)
+    }
+
+    private static let cache = NSCache<NSString, UIImage>()
 }
