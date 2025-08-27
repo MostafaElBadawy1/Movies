@@ -9,12 +9,12 @@ import XCTest
 @testable import MoviesBox
 
 final class MockFetchTopRatedMoviesUseCase: FetchTopRatedMoviesUseCase {
-    var result: Result<[MovieListItem], Error> = .success([])
+    var result: Result<MoviesList, Error> = .success(MoviesList(movies: [], page: 1, totalPages: 1))
     
-    func execute(page: Int) async throws -> [MovieListItem] {
+    func execute(page: Int) async throws -> MoviesList {
         switch result {
-        case .success(let movies):
-            return movies
+        case .success(let list):
+            return list
         case .failure(let error):
             throw error
         }

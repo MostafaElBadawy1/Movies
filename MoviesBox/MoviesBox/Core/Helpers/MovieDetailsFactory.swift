@@ -8,7 +8,7 @@
 import Foundation
 
 enum MovieDetailsFactory {
-    static func makeView(movieId: Int) -> MovieDetailsView {
+    @MainActor static func makeView(movieId: Int) -> MovieDetailsView {
         let repo = MovieDetailsRepositoryImpl()
         let useCase = FetchMovieDetailsUseCaseImpl(repository: repo)
         let vm = MovieDetailsViewModel(movieId: movieId, fetchMovieDetailsUseCase: useCase)
