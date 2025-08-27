@@ -18,23 +18,23 @@ struct FavoritesView: View {
                     ContentUnavailableView("No Favorites", systemImage: "heart", description: Text("Tap the heart on any movie to save it here."))
                 } else {
                     List {
-                        ForEach(favorites) { fav in
+                        ForEach(favorites) { movie in
                             NavigationLink {
-                                MovieDetailsFactory.makeView(movieId: fav.id)
+                                AppFactory.makeMovieDetailsView(movieId: movie.id)
                             } label: {
                                 HStack(spacing: 12) {
-                                    AsyncImageWrapper(url: fav.posterURLString)
+                                    AsyncImageWrapper(url: movie.posterURLString)
                                         .frame(width: 60, height: 90)
                                         .clipped()
                                         .cornerRadius(6)
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text(fav.title)
+                                        Text(movie.title)
                                             .font(.headline)
                                             .lineLimit(2)
-                                        Text("⭐️ \(fav.rating)")
+                                        Text("⭐️ \(movie.rating)")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
-                                        Text(fav.releaseDate)
+                                        Text(movie.releaseDate)
                                             .font(.caption2)
                                             .foregroundColor(.secondary)
                                     }

@@ -30,7 +30,7 @@ struct MoviesListView: View {
                             titleView
                             buildList()
                             .navigationDestination(item: $viewModel.selectedMovie) { movie in
-                                MovieDetailsFactory.makeView(movieId: movie.id)
+                                AppFactory.makeMovieDetailsView(movieId: movie.id)
                             }
                             if viewModel.viewState == .paginating {
                                 ProgressView()

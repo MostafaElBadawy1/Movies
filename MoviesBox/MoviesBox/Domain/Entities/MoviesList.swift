@@ -19,4 +19,3 @@ struct MovieListItem: Identifiable, Equatable, Hashable {
     let rating: String
     let releaseDate: String
 }
-//- Add to favorites option
