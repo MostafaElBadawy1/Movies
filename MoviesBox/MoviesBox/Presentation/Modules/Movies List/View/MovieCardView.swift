@@ -54,7 +54,7 @@ struct MovieCardView: View {
         .overlay(alignment: .topTrailing) {
             Button { toggleFavorite() } label: {
                 Image(systemName: isFavorite ? "heart.fill" : "heart")
-                    .foregroundColor(isFavorite ? .red : .primary)
+                    .foregroundColor(isFavorite ? .red : .yellow)
                     .padding(8)
                     .background(Color.white.opacity(0.95))
                     .clipShape(Circle())
@@ -97,6 +97,9 @@ struct MovieCardView: View {
     }
 
     private func toggleFavorite() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(isFavorite ? .warning : .success)
         if isFavorite {
             if let favoriteObject {
                 modelContext.delete(favoriteObject)
