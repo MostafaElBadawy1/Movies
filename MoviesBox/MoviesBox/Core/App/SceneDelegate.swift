@@ -25,11 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         let window = UIWindow(windowScene: windowScene)
-        let repo = MoviesListRepositoryImpl()
-        let useCase = FetchTopRatedMoviesUseCaseImpl(repository: repo)
-        let viewModel = MoviesListViewModel(fetchTopRatedMoviesUseCase: useCase)
-        let tabRoot = TabRootView(moviesVM: viewModel)
-        let hosting = UIHostingController(rootView: tabRoot)
+        let hosting = UIHostingController(rootView: AppFactory.makeRoot())
         
         window.rootViewController = hosting
         self.window = window

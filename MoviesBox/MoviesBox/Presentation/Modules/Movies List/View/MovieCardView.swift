@@ -96,6 +96,9 @@ struct MovieCardView: View {
     }
 
     private func toggleFavorite() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(isFavorite ? .warning : .success)
         if isFavorite {
             if let favoriteObject {
                 modelContext.delete(favoriteObject)
