@@ -23,9 +23,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
+        @StateObject  var router = Router()
         let window = UIWindow(windowScene: windowScene)
-        let hosting = UIHostingController(rootView: AppFactory.makeRoot())
+        let hosting = UIHostingController(rootView: AppFactory.makeRoot().environmentObject(router))
         window.rootViewController = hosting
         self.window = window
         window.makeKeyAndVisible()
