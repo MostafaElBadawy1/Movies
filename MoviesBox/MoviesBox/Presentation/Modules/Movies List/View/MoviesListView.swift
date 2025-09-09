@@ -10,7 +10,7 @@ import SwiftUI
 struct MoviesListView: View {
     // 1. MARK: - State & Data Properties
     @StateObject var viewModel: MoviesListViewModel
-    
+    @EnvironmentObject private var router: Router
     // 2. MARK: - Constants / Layout Properties
     private let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -29,9 +29,9 @@ struct MoviesListView: View {
                         case .loaded, .paginating:
                             titleView
                             buildList()
-                            .navigationDestination(item: $viewModel.selectedMovie) { movie in
-                                AppFactory.makeMovieDetailsView(movieId: movie.id)
-                            }
+//                            .navigationDestination(item: $viewModel.selectedMovie) { movie in
+//                                AppFactory.makeMovieDetailsView(movieId: movie.id)
+//                            }
                             if viewModel.viewState == .paginating {
                                 ProgressView()
                                     .padding()
@@ -66,23 +66,30 @@ struct MoviesListView: View {
     @ViewBuilder
     private func buildList() -> some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
-                ForEach(viewModel.movies) { movie in
-                    MovieCardView(movie: movie)
-                        .onAppear {
-                            if movie == viewModel.movies.last {
-                                Task { await viewModel.fetchMovies() }
-                            }
-                        }
-                        .onTapGesture {
-                            viewModel.selectedMovie = movie
-                        }
-                }
-            }
+            buildGrid()
             .padding()
         }
     }
     
+    
+    @ViewBuilder
+    func buildGrid() -> some View {
+        LazyVGrid(columns: columns, spacing: 16) {
+            ForEach(viewModel.movies) { movie in
+                MovieCardView(movie: movie)
+                    .equatable()
+                    .onAppear {
+                        if movie == viewModel.movies.last {
+                            Task { await viewModel.fetchMovies() }
+                        }
+                    }
+                    .onTapGesture {
+                        router.push(.details(movieId: movie.id), on: .home)
+                      //  viewModel.selectedMovie = movie
+                    }
+            }
+        }
+    }
 //    @ViewBuilder
 //    private func buildErrorView(_ message: String) -> some View {
 //        VStack {

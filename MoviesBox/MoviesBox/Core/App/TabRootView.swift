@@ -10,16 +10,29 @@ import SwiftData
 
 struct TabRootView: View {
     @StateObject var moviesVM: MoviesListViewModel
-
+    @EnvironmentObject private var router: Router
     var body: some View {
-        TabView {
-            NavigationStack {
+        TabView(selection: $router.selectedTab) {
+            NavigationStack(path: $router.homePath) {
                 MoviesListView(viewModel: moviesVM)
+                    .navigationDestination(for: Route.self) { route in
+                        switch route {
+                            case .details(let id):
+                                AppFactory.makeMovieDetailsView(movieId: id)
+                        }
+                    }
             }
             .tabItem { Label("Movies", systemImage: "film") }
-
-            FavoritesView()
-                .tabItem { Label("Favorites", systemImage: "heart") }
+            NavigationStack(path: $router.favoritesPath) {
+                FavoritesView()
+                    .tabItem { Label("Favorites", systemImage: "heart") }
+                    .navigationDestination(for: Route.self) { route in
+                        switch route {
+                            case .details(let id):
+                                AppFactory.makeMovieDetailsView(movieId: id)
+                        }
+                    }
+            }
         }
         .modelContainer(for: FavoriteMovie.self)
     }

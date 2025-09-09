@@ -50,8 +50,6 @@ final class MoviesListViewModel: ObservableObject {
             viewState = .paginating
         }
         isFetching = true
-//        guard !isLoading, currentPage <= totalPages else { return }
-//        isLoading = true
         
         do {
             let movieList = try await fetchTopRatedMoviesUseCase.execute(page: currentPage)
@@ -65,8 +63,7 @@ final class MoviesListViewModel: ObservableObject {
             totalPages = movieList.totalPages
             viewState = .loaded
         } catch {
-//            viewState = .error(error.localizedDescription)
-//            print("Error fetching movies: \(error)")
+
             let networkError = error.asNetworkError
             self.errorMessage = networkError.errorDescription
             print("zzzzzz\(networkError.errorDescription)")
@@ -76,18 +73,6 @@ final class MoviesListViewModel: ObservableObject {
         isFetching = false
     }
     
-//    func movie(at index: Int) -> MovieListItem {
-//      //  guard index < movies.count else { return nil }
-//        return movies[index]
-//    }
-//    
-//    var numberOfMovies: Int {
-//        return movies.count
-//    }
-    
-    func shouldFetchNextPage(for index: Int) -> Bool {
-        return index == movies.count - 1 && currentPage <= totalPages && !isLoading
-    }
     
     func retry() {
         Task {

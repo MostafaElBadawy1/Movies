@@ -42,7 +42,7 @@ final class NetworkServiceImpl: NetworkService {
 
     func requestAsync<T: Decodable>(_ endpoint: Endpoint, responseType: T.Type) async throws -> T {
         let request = try endpoint.urlRequest()
-        logRequest(request)
+       // logRequest(request)
         let (data, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {

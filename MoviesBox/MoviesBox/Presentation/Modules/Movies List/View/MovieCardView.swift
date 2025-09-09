@@ -10,7 +10,11 @@ import SwiftData
 import UIKit
 import Combine
 
-struct MovieCardView: View {
+struct MovieCardView: View, Equatable {
+    static func == (lhs: MovieCardView, rhs: MovieCardView) -> Bool {
+        lhs.movie == rhs.movie
+    }
+    
     let movie: MovieListItem
     @Environment(\.modelContext) private var modelContext
     @State private var isFavorite = false
@@ -18,8 +22,8 @@ struct MovieCardView: View {
     @State private var notificationCancellable: AnyCancellable?
     var body: some View {
         VStack(spacing: 8) {
-            AsyncImageWrapper(
-                url: movie.posterURL?.absoluteString ?? ""
+            OptimizedImageView(
+                url: (movie.posterURL ?? URL(""))!
             )
             .scaledToFill()
             .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 200)
@@ -108,8 +112,8 @@ struct MovieCardView: View {
             favoriteObject = nil
             isFavorite = false
             NotificationCenter.default.post(name: .favoriteChanged, object: nil, userInfo: ["id": movie.id, "isFavorite": false])
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.warning)
+//            let generator = UINotificationFeedbackGenerator()
+//            generator.notificationOccurred(.warning)
         } else {
             let favorite = FavoriteMovie.from(movie)
             modelContext.insert(favorite)
@@ -117,8 +121,8 @@ struct MovieCardView: View {
             favoriteObject = favorite
             isFavorite = true
             NotificationCenter.default.post(name: .favoriteChanged, object: nil, userInfo: ["id": movie.id, "isFavorite": true])
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
+//            let generator = UINotificationFeedbackGenerator()
+//            generator.notificationOccurred(.success)
         }
     }
 }

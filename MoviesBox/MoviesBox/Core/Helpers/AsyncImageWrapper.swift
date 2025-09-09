@@ -80,3 +80,41 @@ struct AsyncImageWrapper: View {
 
     private static let cache = NSCache<NSString, UIImage>()
 }
+struct OptimizedImageView: View {
+    let url: URL
+  //  let targetSize: CGSize
+    
+    var body: some View {
+        if let cachedImage = OptimizedImageView.cache[url] {
+            cachedImage
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+        }  else {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                              .onAppear { cache(image) }
+                            // .frame(width: targetSize.width, height: targetSize.height)
+                                .clipped()
+                        case .failure(_):
+                            Image(systemName: "photo")
+                                .foregroundColor(.gray)
+                        case .empty:
+                            ProgressView()
+                            // .frame(width: targetSize.width, height: targetSize.height)
+                        @unknown default:
+                            EmptyView()
+                    }
+                }
+            }
+    }
+    private func cache(_ image: Image) {
+        OptimizedImageView.cache[url] = image
+    }
+    
+    // Memory Cache
+    static var cache: [URL: Image] = [:]
+}
